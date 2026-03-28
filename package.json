@@ -9,6 +9,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
+    "gen:types": "openapi-typescript openapi/customer.oas.yaml -o openapi/types.ts",
     "bootstrap": "cdk bootstrap",
     "get-api-url": "bash scripts/get-api-url.sh"
   },
@@ -21,6 +22,8 @@
     "aws-cdk": "^2.1114.1",
     "esbuild": "^0.27.4",
     "jest": "^30",
+    "openapi-typescript": "^7.13.0",
+    "prettier": "^3.8.1",
     "ts-jest": "^29",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.3"

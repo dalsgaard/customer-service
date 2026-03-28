@@ -28,7 +28,10 @@ export class CustomerServiceStack extends Stack {
     table.grantReadWriteData(handler);
 
     const api = new HttpApi(this, 'CustomerServiceApi', {
-      defaultIntegration: new HttpLambdaIntegration('CustomerServiceIntegration', handler),
+      defaultIntegration: new HttpLambdaIntegration(
+        'CustomerServiceIntegration',
+        handler,
+      ),
     });
 
     new CfnOutput(this, 'ApiUrl', {
