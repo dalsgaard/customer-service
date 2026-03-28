@@ -1,10 +1,9 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { Hono } from 'hono';
+import { handle } from 'hono/aws-lambda';
 
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  console.log('Event:', JSON.stringify(event, null, 2));
+const app = new Hono();
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ message: 'Hello from Customer Service!' }),
-  };
-};
+app.get('/customers', (c) => c.json({ customers: [] }));
+app.get('/customers/:id', (c) => c.json({ id: c.req.param('id') }));
+
+export const handler = handle(app);
