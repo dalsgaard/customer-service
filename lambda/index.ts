@@ -17,6 +17,15 @@ type ListCustomersOk =
   operations['listCustomers']['responses'][200]['content']['application/json'];
 type NotFound =
   components['responses']['NotFound']['content']['application/json'];
+type BadRequest =
+  components['responses']['BadRequest']['content']['application/json'];
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUuid(s: string): boolean {
+  return UUID_RE.test(s);
+}
 
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const TABLE_NAME = process.env.TABLE_NAME!;
@@ -31,11 +40,10 @@ app.get('/customers', async (c) => {
 });
 
 app.get('/customers/:id', async (c) => {
+  const id = c.req.param('id');
+  if (!isUuid(id)) return c.json<BadRequest>({ error: 'Invalid id' }, 400);
   const result = await client.send(
-    new GetCommand({
-      TableName: TABLE_NAME,
-      Key: { id: c.req.param('id') },
-    }),
+    new GetCommand({ TableName: TABLE_NAME, Key: { id } }),
   );
   if (!result.Item) return c.json<NotFound>({ error: 'Not found' }, 404);
   return c.json<Customer>(result.Item as Customer);
@@ -49,11 +57,10 @@ app.post('/customers', async (c) => {
 });
 
 app.delete('/customers/:id', async (c) => {
+  const id = c.req.param('id');
+  if (!isUuid(id)) return c.json<BadRequest>({ error: 'Invalid id' }, 400);
   await client.send(
-    new DeleteCommand({
-      TableName: TABLE_NAME,
-      Key: { id: c.req.param('id') },
-    }),
+    new DeleteCommand({ TableName: TABLE_NAME, Key: { id } }),
   );
   return c.body(null, 204);
 });
