@@ -3,6 +3,14 @@ info:
   title: Customer Service API
   version: 1.0.0
 
+servers:
+  - url: https://{apiId}.execute-api.eu-north-1.amazonaws.com
+    description: AWS API Gateway
+    variables:
+      apiId:
+        default: frrbkzpqxh
+        description: API Gateway ID (from cdk deploy output)
+
 paths:
   /customers:
     get:
