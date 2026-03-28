@@ -9,7 +9,8 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "bootstrap": "cdk bootstrap"
+    "bootstrap": "cdk bootstrap",
+    "get-api-url": "bash scripts/get-api-url.sh"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.161",

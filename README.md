@@ -66,6 +66,7 @@ aws iam list-attached-group-policies --group-name <your-group>
 | `lib/customer-service-stack.ts` | Defines the AWS resources (Lambda, API Gateway) |
 | `lambda/index.ts` | The Lambda function handler code |
 | `cdk.json` | CDK configuration and feature flags |
+| `scripts/get-api-url.sh` | Retrieves the deployed API Gateway URL |
 
 ## cdk.json
 
@@ -82,9 +83,11 @@ The rest (ECS, RDS, Redshift, CodePipeline, etc.) have no effect since those ser
 
 ## Useful commands
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+* `npm run build`       compile typescript to js
+* `npm run watch`       watch for changes and compile
+* `npm run test`        perform the jest unit tests
+* `npm run bootstrap`   bootstrap the CDK toolkit in your AWS account (first time only)
+* `npm run get-api-url` get the deployed API Gateway URL
+* `npx cdk deploy`      deploy this stack to your default AWS account/region
+* `npx cdk diff`        compare deployed stack with current state
+* `npx cdk synth`       emits the synthesized CloudFormation template
