@@ -8,6 +8,7 @@ import {
   ScanCommand,
   DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
+import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
 import { randomUUID } from 'crypto';
 import type { components, operations } from '../openapi/types';
 
@@ -28,7 +29,9 @@ function isUuid(s: string): boolean {
 }
 
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
+const sns = new SNSClient({});
 const TABLE_NAME = process.env.TABLE_NAME!;
+const CUSTOMER_CREATED_TOPIC_ARN = process.env.CUSTOMER_CREATED_TOPIC_ARN!;
 
 const app = new Hono();
 
@@ -53,6 +56,11 @@ app.post('/customers', async (c) => {
   const body = await c.req.json<CreateCustomer>();
   const customer: Customer = { id: randomUUID(), ...body };
   await client.send(new PutCommand({ TableName: TABLE_NAME, Item: customer }));
+  await sns.send(new PublishCommand({
+    TopicArn: CUSTOMER_CREATED_TOPIC_ARN,
+    Message: JSON.stringify(customer),
+    Subject: 'customer.created',
+  }));
   return c.json<Customer>(customer, 201);
 });
 

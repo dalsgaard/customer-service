@@ -4,6 +4,7 @@ import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Table, BillingMode, AttributeType } from 'aws-cdk-lib/aws-dynamodb';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
 
 export class CustomerServiceStack extends Stack {
@@ -15,6 +16,10 @@ export class CustomerServiceStack extends Stack {
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
 
+    const customerCreatedTopic = new Topic(this, 'CustomerCreatedTopic', {
+      displayName: 'Customer Created',
+    });
+
     const handler = new NodejsFunction(this, 'CustomerServiceFunction', {
       entry: 'lambda/index.ts',
       runtime: Runtime.NODEJS_24_X,
@@ -22,10 +27,17 @@ export class CustomerServiceStack extends Stack {
       description: 'Customer service Lambda function',
       environment: {
         TABLE_NAME: table.tableName,
+        CUSTOMER_CREATED_TOPIC_ARN: customerCreatedTopic.topicArn,
       },
     });
 
     table.grantReadWriteData(handler);
+    customerCreatedTopic.grantPublish(handler);
+
+    new CfnOutput(this, 'CustomerCreatedTopicArn', {
+      value: customerCreatedTopic.topicArn,
+      description: 'Customer Created SNS Topic ARN',
+    });
 
     const api = new HttpApi(this, 'CustomerServiceApi', {
       defaultIntegration: new HttpLambdaIntegration(
