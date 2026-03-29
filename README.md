@@ -58,6 +58,17 @@ aws iam list-attached-role-policies --role-name <your-role>
 aws iam list-attached-group-policies --group-name <your-group>
 ```
 
+## GitHub Actions
+
+The deploy workflow triggers automatically on pushes to `main` when relevant files change. It requires two GitHub secrets with AWS credentials:
+
+```bash
+gh secret set AWS_ACCESS_KEY_ID
+gh secret set AWS_SECRET_ACCESS_KEY
+```
+
+To create the credentials, go to **AWS IAM** → **Users** → your user → **Security credentials** → **Create access key** (choose "CLI"). The secret access key is only shown once.
+
 ## Project Structure
 
 | File                            | Purpose                                              |
