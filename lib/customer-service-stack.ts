@@ -48,6 +48,7 @@ export class CustomerServiceStack extends Stack {
     new CfnOutput(this, 'CustomerDeletedTopicArn', {
       value: customerDeletedTopic.topicArn,
       description: 'Customer Deleted SNS Topic ARN',
+      exportName: 'CustomerServiceStack-CustomerDeletedTopicArn',
     });
 
     const api = new HttpApi(this, 'CustomerServiceApi', {
