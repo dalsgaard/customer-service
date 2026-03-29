@@ -20,6 +20,10 @@ export class CustomerServiceStack extends Stack {
       displayName: 'Customer Created',
     });
 
+    const customerDeletedTopic = new Topic(this, 'CustomerDeletedTopic', {
+      displayName: 'Customer Deleted',
+    });
+
     const handler = new NodejsFunction(this, 'CustomerServiceFunction', {
       entry: 'lambda/index.ts',
       runtime: Runtime.NODEJS_24_X,
@@ -28,15 +32,22 @@ export class CustomerServiceStack extends Stack {
       environment: {
         TABLE_NAME: table.tableName,
         CUSTOMER_CREATED_TOPIC_ARN: customerCreatedTopic.topicArn,
+        CUSTOMER_DELETED_TOPIC_ARN: customerDeletedTopic.topicArn,
       },
     });
 
     table.grantReadWriteData(handler);
     customerCreatedTopic.grantPublish(handler);
+    customerDeletedTopic.grantPublish(handler);
 
     new CfnOutput(this, 'CustomerCreatedTopicArn', {
       value: customerCreatedTopic.topicArn,
       description: 'Customer Created SNS Topic ARN',
+    });
+
+    new CfnOutput(this, 'CustomerDeletedTopicArn', {
+      value: customerDeletedTopic.topicArn,
+      description: 'Customer Deleted SNS Topic ARN',
     });
 
     const api = new HttpApi(this, 'CustomerServiceApi', {

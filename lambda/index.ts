@@ -32,6 +32,7 @@ const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const sns = new SNSClient({});
 const TABLE_NAME = process.env.TABLE_NAME!;
 const CUSTOMER_CREATED_TOPIC_ARN = process.env.CUSTOMER_CREATED_TOPIC_ARN!;
+const CUSTOMER_DELETED_TOPIC_ARN = process.env.CUSTOMER_DELETED_TOPIC_ARN!;
 
 const app = new Hono();
 
@@ -70,6 +71,11 @@ app.delete('/customers/:id', async (c) => {
   await client.send(
     new DeleteCommand({ TableName: TABLE_NAME, Key: { id } }),
   );
+  await sns.send(new PublishCommand({
+    TopicArn: CUSTOMER_DELETED_TOPIC_ARN,
+    Message: JSON.stringify({ id }),
+    Subject: 'customer.deleted',
+  }));
   return c.body(null, 204);
 });
 

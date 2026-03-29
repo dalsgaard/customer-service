@@ -13,7 +13,8 @@
     "bootstrap": "cdk bootstrap",
     "get-api-url": "bash scripts/get-api-url.sh",
     "update-oas-server": "bash scripts/update-oas-server.sh",
-    "get-topic-arn": "bash scripts/get-topic-arn.sh"
+    "arn:topic:created": "bash scripts/get-created-topic-arn.sh",
+    "arn:topic:deleted": "bash scripts/get-deleted-topic-arn.sh"
   },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.1019.0",
