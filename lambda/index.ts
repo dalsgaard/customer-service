@@ -1,3 +1,4 @@
+import { Logger } from '@aws-lambda-powertools/logger';
 import { Hono } from 'hono';
 import { handle } from 'hono/aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
@@ -28,6 +29,8 @@ function isUuid(s: string): boolean {
   return UUID_RE.test(s);
 }
 
+const logger = new Logger({ serviceName: 'customer-service' });
+
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const sns = new SNSClient({});
 const TABLE_NAME = process.env.TABLE_NAME!;
@@ -38,6 +41,7 @@ const app = new Hono();
 
 app.get('/customers', async (c) => {
   const result = await client.send(new ScanCommand({ TableName: TABLE_NAME }));
+  logger.info('Customers listed', { count: result.Items?.length ?? 0 });
   return c.json<ListCustomersOk>({
     customers: (result.Items ?? []) as Customer[],
   });
@@ -45,11 +49,18 @@ app.get('/customers', async (c) => {
 
 app.get('/customers/:id', async (c) => {
   const id = c.req.param('id');
-  if (!isUuid(id)) return c.json<BadRequest>({ error: 'Invalid id' }, 400);
+  if (!isUuid(id)) {
+    logger.warn('Invalid customer id', { id });
+    return c.json<BadRequest>({ error: 'Invalid id' }, 400);
+  }
   const result = await client.send(
     new GetCommand({ TableName: TABLE_NAME, Key: { id } }),
   );
-  if (!result.Item) return c.json<NotFound>({ error: 'Not found' }, 404);
+  if (!result.Item) {
+    logger.warn('Customer not found', { id });
+    return c.json<NotFound>({ error: 'Not found' }, 404);
+  }
+  logger.info('Customer retrieved', { id });
   return c.json<Customer>(result.Item as Customer);
 });
 
@@ -62,12 +73,16 @@ app.post('/customers', async (c) => {
     Message: JSON.stringify(customer),
     Subject: 'customer.created',
   }));
+  logger.info('Customer created', { id: customer.id });
   return c.json<Customer>(customer, 201);
 });
 
 app.delete('/customers/:id', async (c) => {
   const id = c.req.param('id');
-  if (!isUuid(id)) return c.json<BadRequest>({ error: 'Invalid id' }, 400);
+  if (!isUuid(id)) {
+    logger.warn('Invalid customer id', { id });
+    return c.json<BadRequest>({ error: 'Invalid id' }, 400);
+  }
   await client.send(
     new DeleteCommand({ TableName: TABLE_NAME, Key: { id } }),
   );
@@ -76,6 +91,7 @@ app.delete('/customers/:id', async (c) => {
     Message: JSON.stringify({ id }),
     Subject: 'customer.deleted',
   }));
+  logger.info('Customer deleted', { id });
   return c.body(null, 204);
 });
 

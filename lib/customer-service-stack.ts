@@ -33,6 +33,7 @@ export class CustomerServiceStack extends Stack {
         TABLE_NAME: table.tableName,
         CUSTOMER_CREATED_TOPIC_ARN: customerCreatedTopic.topicArn,
         CUSTOMER_DELETED_TOPIC_ARN: customerDeletedTopic.topicArn,
+        LOG_LEVEL: 'INFO',
       },
     });
 
