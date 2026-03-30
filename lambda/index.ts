@@ -1,5 +1,6 @@
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { handle } from 'hono/aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
@@ -38,6 +39,8 @@ const CUSTOMER_CREATED_TOPIC_ARN = process.env.CUSTOMER_CREATED_TOPIC_ARN!;
 const CUSTOMER_DELETED_TOPIC_ARN = process.env.CUSTOMER_DELETED_TOPIC_ARN!;
 
 const app = new Hono();
+
+app.use(cors());
 
 app.get('/customers', async (c) => {
   const result = await client.send(new ScanCommand({ TableName: TABLE_NAME }));
