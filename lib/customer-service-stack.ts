@@ -5,7 +5,10 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Table, BillingMode, AttributeType } from 'aws-cdk-lib/aws-dynamodb';
 import { Topic } from 'aws-cdk-lib/aws-sns';
+import { Bucket, BlockPublicAccess } from 'aws-cdk-lib/aws-s3';
+import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
+import * as path from 'path';
 
 export class CustomerServiceStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -62,6 +65,25 @@ export class CustomerServiceStack extends Stack {
     new CfnOutput(this, 'ApiUrl', {
       value: api.url!,
       description: 'API Gateway URL',
+    });
+
+    const specsBucket = new Bucket(this, 'OpenApiSpecsBucket', {
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      bucketName: `openapi-specs-${this.account}-${this.region}`,
+    });
+
+    new BucketDeployment(this, 'UploadOpenApiSpec', {
+      sources: [Source.asset(path.join(__dirname, '../openapi'), {
+        exclude: ['types.ts'],
+      })],
+      destinationBucket: specsBucket,
+      destinationKeyPrefix: 'customer-service',
+    });
+
+    new CfnOutput(this, 'OpenApiSpecsBucketName', {
+      value: specsBucket.bucketName,
+      description: 'OpenAPI specs S3 bucket',
+      exportName: 'CustomerServiceStack-OpenApiSpecsBucketName',
     });
   }
 }
