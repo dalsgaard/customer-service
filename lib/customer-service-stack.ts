@@ -65,6 +65,7 @@ export class CustomerServiceStack extends Stack {
     new CfnOutput(this, 'ApiUrl', {
       value: api.url!,
       description: 'API Gateway URL',
+      exportName: 'CustomerServiceStack-ApiUrl',
     });
 
     const specsBucket = new Bucket(this, 'OpenApiSpecsBucket', {
